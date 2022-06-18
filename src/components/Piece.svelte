@@ -8,7 +8,7 @@
 
     var color: string;
     if (isBlack) {
-        color = '#000';
+        color = '#292929';
     } else {
         color = '#e0e0e0';
     }

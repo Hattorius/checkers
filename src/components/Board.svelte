@@ -1,7 +1,3 @@
-<script>
-import Piece from "./Piece.svelte";
-
-</script>
 
 <div class="wrapper">
     <div class="board">
@@ -11,7 +7,7 @@ import Piece from "./Piece.svelte";
             {/each} 
         {/each}
 
-
+        <slot/>
     </div>
 </div>
 
