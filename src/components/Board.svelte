@@ -1,9 +1,13 @@
+<script lang="ts">
+    export let active: { [key: string]: number }[] = [];
+    export let onClick = (i: number, ii: number) => {}
+</script>
 
 <div class="wrapper">
     <div class="board">
         {#each [...Array(10).keys()] as i}
             {#each [...Array(10).keys()] as ii}
-                <div class="tile" style="{i % 2 == ((ii + 1) % 2) ? 'background: #80ed9d' : ''}"/>
+                <div on:click={() => {active[i] ? active[i][ii.toString()] ? onClick(i, ii) : '' : ''}} class="tile" style="{i % 2 == ((ii + 1) % 2) ? 'background: #80ed9d;' : ''} {active[i] ? active[i][ii.toString()] ? 'box-shadow: inset 0px 0px 15px 5px #EDCB0C; cursor: pointer;' : '' : ''}"/>
             {/each} 
         {/each}
 
@@ -13,7 +17,7 @@
 
 <style>
 
-div.wrapper {
+div.wrapper {   
     width: 1050px;
     height: 1050px;
     position: relative;

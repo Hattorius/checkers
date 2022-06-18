@@ -7,36 +7,85 @@ import Piece from "../components/Piece.svelte";
 var board: {
     [key: string]: {
         isKing: boolean,
-        isBlack: boolean
+        isBlack: boolean,
+        active: boolean
     }
 }[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+var turn = false;
+
 onMount(() => {
     for (var i = 0; i < 10; i++) {
         board[0][(i).toString()] = {
             isKing: false,
-            isBlack: true
+            isBlack: true,
+            active: false
         }
         board[1][(i).toString()] = {
             isKing: false,
-            isBlack: true
+            isBlack: true,
+            active: false
         }
 
         board[8][(i).toString()] = {
             isKing: false,
-            isBlack: false
+            isBlack: false,
+            active: false
         }
         board[9][(i).toString()] = {
             isKing: false,
-            isBlack: false
+            isBlack: false,
+            active: false
         }
     }
 });
+
+var currentActive: [
+    number,
+    string
+] = [-1, ''];
+var highlight: {
+    [key: string]: number
+}[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+const pieceClicked = (rowI: number, tileI: string) => {
+    if (turn != board[rowI][tileI].isBlack) return;
+
+    if (currentActive[0] != -1) {
+        board[currentActive[0]][currentActive[1]].active = false;
+    }
+    highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+
+    board[rowI][tileI].active = true;
+    currentActive = [rowI, tileI];
+
+    if (board[rowI + (turn ? 1 : -1)]) {
+        if (typeof board[rowI + (turn ? 1 : -1)][tileI] === 'undefined') {
+            highlight[rowI + (turn ? 1 : -1)][tileI] = 1;
+
+            if (board[rowI + (turn ? 2 : -2)]) {
+                if (typeof board[rowI + (turn ? 2 : -2)][tileI] === 'undefined') {
+                    highlight[rowI + (turn ? 2 : -2)][tileI] = 1;
+                }
+            }
+        }
+    }
+}
+
+const movePieceTo = (rowI: number, tileI: number) => {
+    const piece = board[currentActive[0]][currentActive[1]];
+    delete board[currentActive[0]][currentActive[1]];
+    highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+    currentActive[0] = -1;
+
+    piece.active = false;
+    board[rowI][tileI.toString()] = piece;
+    turn = !turn;
+}
 </script>
 
-<Board>
+<Board active={highlight} onClick={movePieceTo}>
     {#each board as row, i}
         {#each Object.keys(row) as tileI}
-            <Piece posX={parseInt(tileI)} posY={i} {...row[tileI]}/>
+            <Piece onClick={() => {pieceClicked(i, tileI)}} posX={parseInt(tileI)} posY={i} {...row[tileI]}/>
         {/each}
     {/each}
 </Board>
