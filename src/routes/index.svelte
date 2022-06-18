@@ -58,6 +58,29 @@ const pieceClicked = (rowI: number, tileI: string) => {
     currentActive = [rowI, tileI];
 
     if (board[rowI + (turn ? 1 : -1)]) {
+        if (board[rowI + (turn ? 2 : -2)]) {
+            var found = false;
+            if (parseInt(tileI) - 2 >= 0) {
+                if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1]) {
+                    if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn) {
+                        highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
+                        found = true;
+                    }
+                }
+            }
+            if (parseInt(tileI) + 2 <= 9) {
+                // check if someone there
+                if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1]) {
+                    if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn) {
+                        highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
+                        found = true;
+                    }
+                }
+            }
+            if (found) return;
+        }
+
+
         if (typeof board[rowI + (turn ? 1 : -1)][tileI] === 'undefined') {
             highlight[rowI + (turn ? 1 : -1)][tileI] = 1;
 
@@ -71,6 +94,16 @@ const pieceClicked = (rowI: number, tileI: string) => {
 }
 
 const movePieceTo = (rowI: number, tileI: number) => {
+    if (tileI.toString() != currentActive[1]) {
+        var tileToRemove = tileI - parseInt(currentActive[1]);
+        if (tileToRemove > 0) tileToRemove--;
+        else if (tileToRemove < 0) tileToRemove++;
+        var rowToRemove = rowI - currentActive[0];
+        if (rowToRemove > 0) rowToRemove--;
+        else if (rowToRemove < 0) rowToRemove++;
+        delete board[rowI - rowToRemove][(tileI - tileToRemove).toString()];
+    }
+
     const piece = board[currentActive[0]][currentActive[1]];
     delete board[currentActive[0]][currentActive[1]];
     highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
