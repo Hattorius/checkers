@@ -26,27 +26,14 @@ var blackScore = 0;
 var whiteScore = 0;
 
 onMount(() => {
-    for (var i = 0; i < 10; i++) {
-        board[0][(i).toString()] = {
+    for (var i = 0; i < 20; i++) {
+        board[i % 4][i % 5 * 2 + (i + 1) % 2] = {
             isKing: false,
             isBlack: true,
             active: false,
             canAttack: false
         }
-        board[1][(i).toString()] = {
-            isKing: false,
-            isBlack: true,
-            active: false,
-            canAttack: false
-        }
-
-        board[8][(i).toString()] = {
-            isKing: false,
-            isBlack: false,
-            active: false,
-            canAttack: false
-        }
-        board[9][(i).toString()] = {
+        board[i % 4 + 6][i % 5 * 2 + (i + 1) % 2] = {
             isKing: false,
             isBlack: false,
             active: false,
@@ -120,17 +107,11 @@ const pieceClicked = (rowI: number, tileI: string) => {
     currentActive = [rowI, tileI];
 
     if (board[rowI + (turn ? 1 : -1)]) {
-        var found = false;
-        if (found) return;
-
-        if (typeof board[rowI + (turn ? 1 : -1)][tileI] === 'undefined') {
-            highlight[rowI + (turn ? 1 : -1)][tileI] = 1;
-
-            if (board[rowI + (turn ? 2 : -2)]) {
-                if (typeof board[rowI + (turn ? 2 : -2)][tileI] === 'undefined') {
-                    highlight[rowI + (turn ? 2 : -2)][tileI] = 1;
-                }
-            }
+        if (typeof board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1] === "undefined" && parseInt(tileI) + 1 <= 9) {
+            highlight[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1] = 1;
+        }
+        if (typeof board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1] === "undefined" && parseInt(tileI) - 1 >= 0) {
+            highlight[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1] = 1;
         }
     }
 }
