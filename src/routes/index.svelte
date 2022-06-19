@@ -83,6 +83,7 @@ const canAttack = (rowI: number, tileI: number) => {
             while (true) {
                 if (typeof board[rowI + diagonal[0] * iteration][tileI + diagonal[1] * iteration] === "undefined") {
                     highlights.push([rowI + diagonal[0] * iteration, tileI + diagonal[1] * iteration]);
+                    if (!board[rowI][tileI].isKing) break;
                     iteration++;
                 } else {
                     break;
@@ -91,7 +92,7 @@ const canAttack = (rowI: number, tileI: number) => {
             break;
         }
     }
-    
+
     return highlights;
 }
 
@@ -171,6 +172,11 @@ const movePieceTo = (rowI: number, tileI: number) => {
 
     piece.active = false;
     board[rowI][tileI.toString()] = piece;
+
+    if (canAttack(rowI, tileI).length > 0) {
+        return;
+    }
+
     turn = !turn;
 
     canAttackToggle = false;
