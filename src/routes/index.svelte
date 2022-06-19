@@ -39,6 +39,19 @@ onMount(() => {
     }
 });
 
+const canAttack = (rowI: number, tileI: number) => {
+    if (board[rowI]) { // if there is a row
+        if (tileI >= 0) { // if there is a column
+            if (board[rowI - 1][tileI + 1]) { // if there's a piece in between
+                if (board[rowI - 1][tileI + 1].isBlack != turn && !board[rowI][tileI]) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 var currentActive: [
     number,
     string
@@ -58,27 +71,58 @@ const pieceClicked = (rowI: number, tileI: string) => {
     currentActive = [rowI, tileI];
 
     if (board[rowI + (turn ? 1 : -1)]) {
-        if (board[rowI + (turn ? 2 : -2)]) {
-            var found = false;
-            if (parseInt(tileI) - 2 >= 0) {
-                if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1]) {
-                    if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn) {
-                        highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
-                        found = true;
-                    }
-                }
-            }
-            if (parseInt(tileI) + 2 <= 9) {
-                // check if someone there
-                if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1]) {
-                    if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn) {
-                        highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
-                        found = true;
-                    }
-                }
-            }
-            if (found) return;
+        var found = false;
+        if (canAttack(rowI + 2, parseInt(tileI) - 2)) {
+            highlight[rowI + 2][parseInt(tileI) - 2] = 1;
+            found = true;
         }
+        if (canAttack(rowI + 2, parseInt(tileI) + 2)) {
+            highlight[rowI + 2][parseInt(tileI) + 2] = 1;
+            found = true;
+        }
+        if (canAttack(rowI - 2, parseInt(tileI) - 2)) {
+            highlight[rowI - 2][parseInt(tileI) - 2] = 1;
+            found = true;
+        }
+        if (canAttack(rowI - 2, parseInt(tileI) + 2)) {
+            highlight[rowI - 2][parseInt(tileI) + 2] = 1;
+            found = true;
+        }
+        if (found) return;
+
+        // if (board[rowI + (turn ? 2 : -2)]) {
+        //     var found = false;
+        //     if (parseInt(tileI) - 2 >= 0) {
+        //         if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1]) {
+        //             if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn && !board[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2]) {
+        //                 highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
+        //                 found = true;
+        //             }
+        //         }
+        //         if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) - 1]) {
+        //             if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn) {
+        //                 highlight[rowI - (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
+        //                 found = true;
+        //             }
+        //         }
+        //     }
+        //     if (parseInt(tileI) + 2 <= 9) {
+        //         // check if someone there
+        //         if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1]) {
+        //             if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn && !board[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2]) {
+        //                 highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
+        //                 found = true;
+        //             }
+        //         }
+        //         if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) + 1]) {
+        //             if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn) {
+        //                 highlight[rowI - (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
+        //                 found = true;
+        //             }
+        //         }
+        //     }
+        //     if (found) return;
+        // }
 
 
         if (typeof board[rowI + (turn ? 1 : -1)][tileI] === 'undefined') {
