@@ -18,12 +18,12 @@
 <style>
 
 div.wrapper {   
-    width: 1050px;
-    height: 1050px;
+    width: 1000px;
+    height: 1000px;
     position: relative;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
+    margin-top: 20px;
 }
 
 div.wrapper > div.board {

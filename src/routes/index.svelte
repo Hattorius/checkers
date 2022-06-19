@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
-
+import Score from "../components/Score.svelte";
 import Board from "../components/Board.svelte";
 import Piece from "../components/Piece.svelte";
 
@@ -21,6 +21,9 @@ var highlight: {
     [key: string]: number
 }[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 var canAttackToggle = false;
+
+var blackScore = 0;
+var whiteScore = 0;
 
 onMount(() => {
     for (var i = 0; i < 10; i++) {
@@ -141,6 +144,12 @@ const movePieceTo = (rowI: number, tileI: number) => {
         if (rowToRemove > 0) rowToRemove--;
         else if (rowToRemove < 0) rowToRemove++;
         delete board[rowI - rowToRemove][(tileI - tileToRemove).toString()];
+
+        if (turn) {
+            blackScore += 1;
+        } else {
+            whiteScore += 1;
+        }
     }
 
     const piece = board[currentActive[0]][currentActive[1]];
@@ -164,6 +173,7 @@ const movePieceTo = (rowI: number, tileI: number) => {
 }
 </script>
 
+<Score black={blackScore} white={whiteScore} turn={turn}/>
 <Board active={highlight} onClick={movePieceTo}>
     {#each board as row, i}
         {#each Object.keys(row) as tileI}

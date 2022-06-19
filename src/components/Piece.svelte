@@ -8,7 +8,7 @@
 
     export let onClick = () => {};
 
-    var color: string;
+    var color: string = 'pink';
     if (isBlack) {
         color = '#292929';
     } else {
@@ -16,14 +16,13 @@
     }
 </script>
 
-<div on:click={onClick} style="--theme-color: {color}; left: {posX * 100 + 10}px; top: {posY * 100 + 10}px; {canAttack ? 'box-shadow: 0px 0px 15px 5px #f7572f;' : ''} {active ? 'box-shadow: 0px 0px 15px 5px #EDCB0C;' : ''} {isKing ? 'background: linear-gradient(135deg, #edcb0c 50%, ' + color + ' 50%);' : ''}"/>
+<div on:click={onClick} style="background: {color}; left: {posX * 100 + 10}px; top: {posY * 100 + 10}px; {canAttack ? 'box-shadow: 0px 0px 15px 5px #f7572f;' : ''} {active ? 'box-shadow: 0px 0px 15px 5px #EDCB0C;' : ''} {isKing ? 'background: linear-gradient(135deg, #edcb0c 50%, ' + color + ' 50%);' : ''}"/>
 
 <style>
     div {
         width: 80px;
         height: 80px;
         border-radius: 50%;
-        background: var(--theme-color);
         position: absolute;
         cursor: pointer;
     }
