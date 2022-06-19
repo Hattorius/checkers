@@ -8,50 +8,11 @@ var board: {
     [key: string]: {
         isKing: boolean,
         isBlack: boolean,
-        active: boolean
+        active: boolean,
+        canAttack: boolean
     }
 }[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 var turn = false;
-
-onMount(() => {
-    for (var i = 0; i < 10; i++) {
-        board[0][(i).toString()] = {
-            isKing: false,
-            isBlack: true,
-            active: false
-        }
-        board[1][(i).toString()] = {
-            isKing: false,
-            isBlack: true,
-            active: false
-        }
-
-        board[8][(i).toString()] = {
-            isKing: false,
-            isBlack: false,
-            active: false
-        }
-        board[9][(i).toString()] = {
-            isKing: false,
-            isBlack: false,
-            active: false
-        }
-    }
-});
-
-const canAttack = (rowI: number, tileI: number) => {
-    if (board[rowI]) { // if there is a row
-        if (tileI >= 0) { // if there is a column
-            if (board[rowI - 1][tileI + 1]) { // if there's a piece in between
-                if (board[rowI - 1][tileI + 1].isBlack != turn && !board[rowI][tileI]) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
 var currentActive: [
     number,
     string
@@ -59,8 +20,103 @@ var currentActive: [
 var highlight: {
     [key: string]: number
 }[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+var canAttackToggle = false;
+
+onMount(() => {
+    for (var i = 0; i < 10; i++) {
+        board[0][(i).toString()] = {
+            isKing: false,
+            isBlack: true,
+            active: false,
+            canAttack: false
+        }
+        board[1][(i).toString()] = {
+            isKing: false,
+            isBlack: true,
+            active: false,
+            canAttack: false
+        }
+
+        board[8][(i).toString()] = {
+            isKing: false,
+            isBlack: false,
+            active: false,
+            canAttack: false
+        }
+        board[9][(i).toString()] = {
+            isKing: false,
+            isBlack: false,
+            active: false,
+            canAttack: false
+        }
+    }
+});
+
+// const canAttack = (rowI: number, tileI: number, xStep: number, yStep: number) => {
+//     if (board[rowI + xStep * 2]) { // if there is a row
+//         if (tileI + yStep * 2 >= 0) { // if there is a column
+//             if (board[rowI + xStep][tileI + 1]) { // if there's a piece in between
+//                 if (board[rowI - 1][tileI + 1].isBlack != turn && !board[rowI][tileI]) {
+//                     return true;
+//                 }
+//             }
+//         }
+//     }
+//     return false;
+// }
+
+const canAttack = (rowI: number, tileI: number) => {
+    var highlights: [number, number][] = [];
+    const diagonals = [[-1, 1], [-1, -1], [1, -1], [1, 1]];
+
+    for (var i = 0; i < diagonals.length; i++) {
+        const diagonal = diagonals[i];
+
+        // row does not exist
+        if (!board[rowI + diagonal[0] * 2]) {
+            i++;
+            continue;
+        }
+
+         // if column does no exist
+        if (tileI + diagonal[1] * 2 > 9 || tileI + diagonal[1] * 2 < 0) {
+            continue;
+        }
+
+        // if there is a piece to take and if there is place behind the piece
+        if (typeof board[rowI + diagonal[0] * 2][tileI + diagonal[1] * 2] !== "undefined" || typeof board[rowI + diagonal[0]][tileI + diagonal[1]] === "undefined") {
+            continue;
+        }
+
+        // if piece is of the other team
+        if (board[rowI + diagonal[0]][tileI + diagonal[1]].isBlack == board[rowI][tileI].isBlack) {
+            continue
+        }
+
+        // highlight attacking moves and lock to only attacking
+        canAttackToggle = true;
+        board[rowI][tileI].canAttack = true;
+        highlights.push([rowI + diagonal[0] * 2, tileI + diagonal[1] * 2]);
+    }
+    return highlights;
+}
+
 const pieceClicked = (rowI: number, tileI: string) => {
     if (turn != board[rowI][tileI].isBlack) return;
+    if (canAttackToggle) {
+        if (!board[rowI][tileI].canAttack) return;
+        const highlights = canAttack(rowI, parseInt(tileI));
+        highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+
+        board[rowI][tileI].active = true;
+        currentActive = [rowI, tileI];
+
+        for (var i = 0; i < highlights.length; i++) {
+            highlight[highlights[i][0]][highlights[i][1]] = 1;
+        }
+
+        return;
+    };
 
     if (currentActive[0] != -1) {
         board[currentActive[0]][currentActive[1]].active = false;
@@ -72,58 +128,7 @@ const pieceClicked = (rowI: number, tileI: string) => {
 
     if (board[rowI + (turn ? 1 : -1)]) {
         var found = false;
-        if (canAttack(rowI + 2, parseInt(tileI) - 2)) {
-            highlight[rowI + 2][parseInt(tileI) - 2] = 1;
-            found = true;
-        }
-        if (canAttack(rowI + 2, parseInt(tileI) + 2)) {
-            highlight[rowI + 2][parseInt(tileI) + 2] = 1;
-            found = true;
-        }
-        if (canAttack(rowI - 2, parseInt(tileI) - 2)) {
-            highlight[rowI - 2][parseInt(tileI) - 2] = 1;
-            found = true;
-        }
-        if (canAttack(rowI - 2, parseInt(tileI) + 2)) {
-            highlight[rowI - 2][parseInt(tileI) + 2] = 1;
-            found = true;
-        }
         if (found) return;
-
-        // if (board[rowI + (turn ? 2 : -2)]) {
-        //     var found = false;
-        //     if (parseInt(tileI) - 2 >= 0) {
-        //         if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1]) {
-        //             if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn && !board[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2]) {
-        //                 highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
-        //                 found = true;
-        //             }
-        //         }
-        //         if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) - 1]) {
-        //             if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) - 1].isBlack != turn) {
-        //                 highlight[rowI - (turn ? 2 : -2)][parseInt(tileI) - 2] = 1;
-        //                 found = true;
-        //             }
-        //         }
-        //     }
-        //     if (parseInt(tileI) + 2 <= 9) {
-        //         // check if someone there
-        //         if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1]) {
-        //             if (board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn && !board[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2]) {
-        //                 highlight[rowI + (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
-        //                 found = true;
-        //             }
-        //         }
-        //         if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) + 1]) {
-        //             if (board[rowI - (turn ? 1 : -1)][parseInt(tileI) + 1].isBlack != turn) {
-        //                 highlight[rowI - (turn ? 2 : -2)][parseInt(tileI) + 2] = 1;
-        //                 found = true;
-        //             }
-        //         }
-        //     }
-        //     if (found) return;
-        // }
-
 
         if (typeof board[rowI + (turn ? 1 : -1)][tileI] === 'undefined') {
             highlight[rowI + (turn ? 1 : -1)][tileI] = 1;
@@ -149,6 +154,7 @@ const movePieceTo = (rowI: number, tileI: number) => {
     }
 
     const piece = board[currentActive[0]][currentActive[1]];
+    piece.canAttack = false;
     delete board[currentActive[0]][currentActive[1]];
     highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
     currentActive[0] = -1;
@@ -156,6 +162,15 @@ const movePieceTo = (rowI: number, tileI: number) => {
     piece.active = false;
     board[rowI][tileI.toString()] = piece;
     turn = !turn;
+
+    canAttackToggle = false;
+    for (var i = 0; i < board.length; i++) {
+        Object.keys(board[i]).forEach((tile) => {
+            if (board[i][tile].isBlack == turn) {
+                canAttack(i, parseInt(tile));
+            }
+        })
+    }
 }
 </script>
 
