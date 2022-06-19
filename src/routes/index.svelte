@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMount } from "svelte";
+import { afterUpdate, onMount } from "svelte";
 import Score from "../components/Score.svelte";
 import Board from "../components/Board.svelte";
 import Piece from "../components/Piece.svelte";
@@ -34,47 +34,64 @@ onMount(() => {
             canAttack: false
         }
         board[i % 4 + 6][i % 5 * 2 + (i + 1) % 2] = {
-            isKing: false,
+            isKing: i % 7 == 0 ? true : false,
             isBlack: false,
             active: false,
             canAttack: false
         }
     }
+    delete board[1][6];
+    delete board[2][5];
 });
 
 const canAttack = (rowI: number, tileI: number) => {
     var highlights: [number, number][] = [];
-    const diagonals = [[-1, 1], [-1, -1], [1, -1], [1, 1]];
+    var diagonals = [[-1, 1], [-1, -1], [1, -1], [1, 1]];
 
     for (var i = 0; i < diagonals.length; i++) {
         const diagonal = diagonals[i];
+        var iteration = 1;
+        while (true) {
+            iteration += 1;
+            if (iteration == 3 && !board[rowI][tileI].isKing) break;
+            // row does not exist
+            if (!board[rowI + diagonal[0] * iteration]) {
+                break;
+            }
 
-        // row does not exist
-        if (!board[rowI + diagonal[0] * 2]) {
-            i++;
-            continue;
+            // if column does not exist
+            if (tileI + diagonal[1] * iteration > 9 || tileI + diagonal[1] * iteration < 0) {
+                break;
+            }
+
+            // if there is a piece to take
+            if (typeof board[rowI + diagonal[0] * (iteration - 1)][tileI + diagonal[1] * (iteration - 1)] === "undefined") {
+                continue;
+            }
+
+            // if there is place behind the piece
+            if (typeof board[rowI + diagonal[0] * iteration][tileI + diagonal[1] * iteration] !== "undefined") {
+                break;
+            }
+
+            if (board[rowI + diagonal[0] * (iteration - 1)][tileI + diagonal[1] * (iteration - 1)].isBlack == board[rowI][tileI].isBlack) {
+                break
+            }
+
+            canAttackToggle = true;
+            board[rowI][tileI].canAttack = true;
+            while (true) {
+                if (typeof board[rowI + diagonal[0] * iteration][tileI + diagonal[1] * iteration] === "undefined") {
+                    highlights.push([rowI + diagonal[0] * iteration, tileI + diagonal[1] * iteration]);
+                    iteration++;
+                } else {
+                    break;
+                }
+            }
+            break;
         }
-
-         // if column does no exist
-        if (tileI + diagonal[1] * 2 > 9 || tileI + diagonal[1] * 2 < 0) {
-            continue;
-        }
-
-        // if there is a piece to take and if there is place behind the piece
-        if (typeof board[rowI + diagonal[0] * 2][tileI + diagonal[1] * 2] !== "undefined" || typeof board[rowI + diagonal[0]][tileI + diagonal[1]] === "undefined") {
-            continue;
-        }
-
-        // if piece is of the other team
-        if (board[rowI + diagonal[0]][tileI + diagonal[1]].isBlack == board[rowI][tileI].isBlack) {
-            continue
-        }
-
-        // highlight attacking moves and lock to only attacking
-        canAttackToggle = true;
-        board[rowI][tileI].canAttack = true;
-        highlights.push([rowI + diagonal[0] * 2, tileI + diagonal[1] * 2]);
     }
+    
     return highlights;
 }
 
@@ -107,12 +124,28 @@ const pieceClicked = (rowI: number, tileI: string) => {
     board[rowI][tileI].active = true;
     currentActive = [rowI, tileI];
 
-    if (board[rowI + (turn ? 1 : -1)]) {
-        if (typeof board[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1] === "undefined" && parseInt(tileI) + 1 <= 9) {
-            highlight[rowI + (turn ? 1 : -1)][parseInt(tileI) + 1] = 1;
+    var rowStep = turn ? 1 : -1;
+    if (rowStep) {
+        var iteration = 0;
+        while (true) {
+            iteration++;
+            if (typeof board[rowI + rowStep * iteration][parseInt(tileI) + iteration] === "undefined" && parseInt(tileI) + 1 <= 9) {
+                highlight[rowI + rowStep * iteration][parseInt(tileI) + iteration] = 1;
+            } else {
+                break;
+            }
+            if (!board[rowI][tileI].isKing) break;
         }
-        if (typeof board[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1] === "undefined" && parseInt(tileI) - 1 >= 0) {
-            highlight[rowI + (turn ? 1 : -1)][parseInt(tileI) - 1] = 1;
+
+        iteration = 0;
+        while (true) {
+            iteration++;
+            if (typeof board[rowI + rowStep * iteration][parseInt(tileI) - iteration] === "undefined" && parseInt(tileI) - 1 >= 0) {
+                highlight[rowI + rowStep * iteration][parseInt(tileI) - iteration] = 1;
+            } else {
+                break;
+            }
+            if (!board[rowI][tileI].isKing) break;
         }
     }
 }
