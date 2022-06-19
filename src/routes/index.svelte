@@ -117,7 +117,9 @@ const pieceClicked = (rowI: number, tileI: string) => {
 }
 
 const movePieceTo = (rowI: number, tileI: number) => {
-    if (tileI.toString() != currentActive[1]) {
+    var difference = tileI - parseInt(currentActive[1]);
+    if (difference < 0) difference *= -1;
+    if (difference == 2) {
         var tileToRemove = tileI - parseInt(currentActive[1]);
         if (tileToRemove > 0) tileToRemove--;
         else if (tileToRemove < 0) tileToRemove++;
