@@ -6,7 +6,7 @@ import Piece from "../components/Piece.svelte";
 
 var board: {
     [key: string]: {
-        isKing: boolean,
+        isKing: boolean, // not implemented
         isBlack: boolean,
         active: boolean,
         canAttack: boolean
@@ -52,19 +52,6 @@ onMount(() => {
     }
 });
 
-// const canAttack = (rowI: number, tileI: number, xStep: number, yStep: number) => {
-//     if (board[rowI + xStep * 2]) { // if there is a row
-//         if (tileI + yStep * 2 >= 0) { // if there is a column
-//             if (board[rowI + xStep][tileI + 1]) { // if there's a piece in between
-//                 if (board[rowI - 1][tileI + 1].isBlack != turn && !board[rowI][tileI]) {
-//                     return true;
-//                 }
-//             }
-//         }
-//     }
-//     return false;
-// }
-
 const canAttack = (rowI: number, tileI: number) => {
     var highlights: [number, number][] = [];
     const diagonals = [[-1, 1], [-1, -1], [1, -1], [1, 1]];
@@ -109,6 +96,9 @@ const pieceClicked = (rowI: number, tileI: string) => {
         highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 
         board[rowI][tileI].active = true;
+        if (currentActive[0] != -1) {
+            board[currentActive[0]][currentActive[1]].active = false;
+        }
         currentActive = [rowI, tileI];
 
         for (var i = 0; i < highlights.length; i++) {
