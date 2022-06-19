@@ -34,14 +34,12 @@ onMount(() => {
             canAttack: false
         }
         board[i % 4 + 6][i % 5 * 2 + (i + 1) % 2] = {
-            isKing: i % 7 == 0 ? true : false,
+            isKing: false,
             isBlack: false,
             active: false,
             canAttack: false
         }
     }
-    delete board[1][6];
-    delete board[2][5];
 });
 
 const canAttack = (rowI: number, tileI: number) => {
@@ -154,13 +152,17 @@ const pieceClicked = (rowI: number, tileI: string) => {
 const movePieceTo = (rowI: number, tileI: number) => {
     const tileDifference = tileI - parseInt(currentActive[1]);
     const rowDifference = rowI - currentActive[0];
+    var attacked = false;
     if (tileDifference > 1 || tileDifference < -1) {
         const tileStep = tileDifference < -1 ? -1 : 1;
         const rowStep = rowDifference < -1 ? -1 : 1;
         for (var i = 1; i < (tileDifference < -1 ? tileDifference * -1 : tileDifference); i++) {
-            delete board[rowI - (rowStep * i)][(tileI - (tileStep * i)).toString()];
-            if (turn) blackScore += 1;
-            else whiteScore += 1;
+            if (typeof board[rowI - (rowStep * i)][(tileI - (tileStep * i)).toString()] !== 'undefined') {
+                delete board[rowI - (rowStep * i)][(tileI - (tileStep * i)).toString()];
+                if (turn) blackScore += 1;
+                else whiteScore += 1;
+                attacked = true;
+            }
         }
     }
 
@@ -173,8 +175,10 @@ const movePieceTo = (rowI: number, tileI: number) => {
     piece.active = false;
     board[rowI][tileI.toString()] = piece;
 
-    if (canAttack(rowI, tileI).length > 0) {
-        return;
+    if (attacked) {
+        if (canAttack(rowI, tileI).length > 0) {
+            return;
+        }
     }
 
     turn = !turn;
