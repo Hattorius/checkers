@@ -80,10 +80,12 @@ const canAttack = (rowI: number, tileI: number) => {
 
 const pieceClicked = (rowI: number, tileI: string) => {
     if (turn != board[rowI][tileI].isBlack) return;
+
+    highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
+
     if (canAttackToggle) {
         if (!board[rowI][tileI].canAttack) return;
         const highlights = canAttack(rowI, parseInt(tileI));
-        highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 
         board[rowI][tileI].active = true;
         if (currentActive[0] != -1) {
@@ -101,7 +103,6 @@ const pieceClicked = (rowI: number, tileI: string) => {
     if (currentActive[0] != -1) {
         board[currentActive[0]][currentActive[1]].active = false;
     }
-    highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
 
     board[rowI][tileI].active = true;
     currentActive = [rowI, tileI];
@@ -117,21 +118,15 @@ const pieceClicked = (rowI: number, tileI: string) => {
 }
 
 const movePieceTo = (rowI: number, tileI: number) => {
-    var difference = tileI - parseInt(currentActive[1]);
-    if (difference < 0) difference *= -1;
-    if (difference == 2) {
-        var tileToRemove = tileI - parseInt(currentActive[1]);
-        if (tileToRemove > 0) tileToRemove--;
-        else if (tileToRemove < 0) tileToRemove++;
-        var rowToRemove = rowI - currentActive[0];
-        if (rowToRemove > 0) rowToRemove--;
-        else if (rowToRemove < 0) rowToRemove++;
-        delete board[rowI - rowToRemove][(tileI - tileToRemove).toString()];
-
-        if (turn) {
-            blackScore += 1;
-        } else {
-            whiteScore += 1;
+    const tileDifference = tileI - parseInt(currentActive[1]);
+    const rowDifference = rowI - currentActive[0];
+    if (tileDifference > 1 || tileDifference < -1) {
+        const tileStep = tileDifference < -1 ? -1 : 1;
+        const rowStep = rowDifference < -1 ? -1 : 1;
+        for (var i = 1; i < (tileDifference < -1 ? tileDifference * -1 : tileDifference); i++) {
+            delete board[rowI - (rowStep * i)][(tileI - (tileStep * i)).toString()];
+            if (turn) blackScore += 1;
+            else whiteScore += 1;
         }
     }
 
