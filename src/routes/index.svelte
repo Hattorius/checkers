@@ -206,7 +206,7 @@
 <Board active={highlight} onClick={movePieceTo}>
     {#each board as row, i}
         {#each Object.keys(row) as tileI}
-            <Piece onClick={() => {pieceClicked(i, tileI)}} posX={parseInt(tileI)} posY={i} {...row[tileI]}/>
+            <Piece onClick={() => {pieceClicked(i, tileI)}} posX={parseInt(tileI)} posY={i} {...board[i][tileI]}/>
         {/each}
     {/each}
 </Board>
