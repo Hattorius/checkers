@@ -21,6 +21,7 @@
         [key: string]: number
     }[] = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
     var canAttackToggle = false;
+    var piecesThatCanAttack: [number, number][] = [];
 
     var blackScore = 0;
     var whiteScore = 0;
@@ -87,6 +88,7 @@
                         break;
                     }
                 }
+                piecesThatCanAttack.push([rowI, tileI]);
                 break;
             }
         }
@@ -166,13 +168,19 @@
             }
         }
 
+        piecesThatCanAttack.forEach(piecePosition => {
+            board[piecePosition[0]][piecePosition[1]].canAttack = false;
+        });
+        piecesThatCanAttack = [];
+
         const piece = board[currentActive[0]][currentActive[1]];
-        piece.canAttack = false;
         delete board[currentActive[0]][currentActive[1]];
         highlight = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
         currentActive[0] = -1;
 
         piece.active = false;
+        if (turn && rowI == 0) piece.isKing = true;
+        if (!turn && rowI == 9) piece.isKing = true;
         board[rowI][tileI.toString()] = piece;
 
         if (attacked) {
